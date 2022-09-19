@@ -1,0 +1,49 @@
+{
+  "name": "@liuyang0826/openapi-parser",
+  "type": "module",
+  "version": "0.0.1",
+  "description": "parse openapi to typescript description",
+  "scripts": {
+    "build": "tsup",
+    "release": "bumpp && npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/1161906592/openapi-parser.git"
+  },
+  "keywords": [
+    "openapi",
+    "swagger"
+  ],
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "author": "liuyang.0826<1161906592@qq.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/1161906592/openapi-parser/issues"
+  },
+  "homepage": "https://github.com/1161906592/openapi-parser#readme",
+  "devDependencies": {
+    "@liuyang0826/eslint-config": "^0.0.1",
+    "bumpp": "^8.2.1",
+    "eslint": "^8.23.0",
+    "esno": "^0.16.3",
+    "prettier": "^2.7.1",
+    "tsup": "^6.2.3",
+    "typescript": "^4.8.3",
+    "vite": "^3.1.0",
+    "vitest": "^0.23.1"
+  }
+}
