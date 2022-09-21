@@ -138,7 +138,7 @@ function resolveSchema(schema: Schema, definitions: Record<string, Definition | 
   if (schema.type === 'array') {
     if (schema.items?.$ref) {
       resolveInterface(schema.items.$ref, definitions, collector, true)
-      name = collector.at(-1)?.name
+      name = `${collector.at(-1)?.name}[]`
     } else {
       name = javaTypeToTsKeyword(schema)
     }

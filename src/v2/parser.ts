@@ -170,7 +170,7 @@ function resolveSchema(schema: Schema, definitions: Record<string, Definition | 
   if (schema.type === 'array') {
     if (schema.items?.$ref) {
       resolveInterface(schema.items.$ref, definitions, collector, true)
-      name = collector.at(-1)?.name
+      name = `${collector.at(-1)?.name}[]`
     } else {
       name = javaTypeToTsKeyword(schema)
     }
@@ -253,7 +253,6 @@ export default function parser(swaggerJSON: SwaggerV2, path: string, method: str
   return {
     name,
     comment,
-
     body,
     isFormData,
     pathVar,
