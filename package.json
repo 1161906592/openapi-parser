@@ -1,7 +1,7 @@
 {
   "name": "@liuyang0826/openapi-parser",
   "type": "module",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "parse openapi to typescript description",
   "scripts": {
     "build": "tsup",
