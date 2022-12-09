@@ -148,6 +148,10 @@ function resolveSchema(schema: Schema, definitions: Record<string, Definition | 
       resolveInterface(schema.$ref, definitions, collector, true)
     } else {
       resolveProperties(defaultName, schema as Definition, definitions, collector, true)
+
+      if (!collector.at(-1)?.fields.length) {
+        collector.length = 0
+      }
     }
 
     name = collector.at(-1)?.name

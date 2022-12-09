@@ -180,6 +180,10 @@ function resolveSchema(schema: Schema, definitions: Record<string, Definition | 
       resolveInterface(schema.$ref, definitions, collector, true)
     } else {
       resolveProperties(defaultName, schema as Definition, definitions, collector, true)
+
+      if (!collector.at(-1)?.fields.length) {
+        collector.length = 0
+      }
     }
 
     name = collector.at(-1)?.name
@@ -232,7 +236,6 @@ export default function parser(swaggerJSON: SwaggerV2, path: string, method: str
   if (!definition) return
   const name = parseOperationId(definition.operationId)
   const pathVars = path.match(/\{(.+?)\}/g)?.map((d) => d.slice(1, -1)) || []
-  const isFormData = definition.parameters?.some((d) => d.in === 'formData')
 
   const pathVarTypes = resolvePath(pathVars, definition, definitions)
   const pathVar = pathVarTypes.at(-1)?.name
@@ -255,7 +258,7 @@ export default function parser(swaggerJSON: SwaggerV2, path: string, method: str
     name,
     comment,
     body,
-    isFormData,
+    isFormData: definition.parameters?.some((d) => d.in === 'formData'),
     pathVar,
     query,
     res,
