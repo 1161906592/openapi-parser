@@ -5,11 +5,14 @@
   "description": "parse openapi to typescript description",
   "scripts": {
     "build": "tsup",
-    "release": "bumpp && npm publish --access public"
+    "release": "bumpp && tsup && npm publish"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/1161906592/openapi-parser.git"
+    "url": "https://github.com/liuyang0826/openapi-parser.git"
   },
   "keywords": [
     "openapi",

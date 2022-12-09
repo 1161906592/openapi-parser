@@ -42,27 +42,28 @@ function resolveProperties(
   markRequired: boolean
 ) {
   const { properties, required = [], description } = definition || {}
-  if (!properties) return
   const interfaceBody: Field[] = []
 
-  Object.keys(properties).forEach((propName) => {
-    const { type, $ref, description, format } = properties[propName] || {}
-    const tsKeyword = $ref ? $ref : type ? javaTypeToTsKeyword(properties[propName] || {}) : null
+  if (properties) {
+    Object.keys(properties).forEach((propName) => {
+      const { type, $ref, description, format } = properties[propName] || {}
+      const tsKeyword = $ref ? $ref : type ? javaTypeToTsKeyword(properties[propName] || {}) : null
 
-    if (!tsKeyword) {
-      console.log(`the ${propName} attribute of the ${$ref} is ignored`)
+      if (!tsKeyword) {
+        console.log(`the ${propName} attribute of the ${$ref} is ignored`)
 
-      return
-    }
+        return
+      }
 
-    interfaceBody.push({
-      name: propName,
-      optional: !markRequired || !required.includes(propName),
-      type: tsKeyword || '',
-      description,
-      format,
+      interfaceBody.push({
+        name: propName,
+        optional: !markRequired || !required.includes(propName),
+        type: tsKeyword || '',
+        description,
+        format,
+      })
     })
-  })
+  }
 
   collector.unshift({
     name,

@@ -5,7 +5,7 @@ export type JavaType = JavaBaseType | 'array' | 'object'
 export interface Definition {
   required?: string[]
   description?: string
-  properties: Properties
+  properties?: Properties
 }
 
 export type Properties = Record<string, Property | undefined>
