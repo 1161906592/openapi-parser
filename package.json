@@ -4,6 +4,7 @@
   "version": "0.0.7",
   "description": "parse openapi to typescript description",
   "scripts": {
+    "test": "esno ./src/parser.ts",
     "build": "tsup",
     "release": "bumpp && tsup && npm publish"
   },
@@ -40,6 +41,7 @@
   "homepage": "https://github.com/1161906592/openapi-parser#readme",
   "devDependencies": {
     "@liuyang0826/eslint-config": "^0.0.1",
+    "@types/reserved-words": "^0.1.0",
     "bumpp": "^8.2.1",
     "eslint": "^8.23.0",
     "esno": "^0.16.3",
@@ -48,5 +50,9 @@
     "typescript": "^4.8.3",
     "vite": "^3.1.0",
     "vitest": "^0.23.1"
+  },
+  "dependencies": {
+    "reserved-words": "^0.1.2",
+    "tiny-pinyin": "^1.3.2"
   }
 }
