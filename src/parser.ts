@@ -1,6 +1,6 @@
 import ReservedDict from 'reserved-words'
 import pinyin from 'tiny-pinyin'
-import { ParseResult } from './types'
+import { Interface, ParseResult } from './types'
 
 function toFirstUpperCase(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
@@ -69,10 +69,10 @@ export default function parser(openAPIData: any, path: string, method: string): 
   if (!operationObject) return
   const name = resolveFunctionName(stripDot(operationObject.operationId), method)
   const comment = [operationObject.summary, operationObject.description].filter(Boolean).join(', ')
-  const interfaces: any[] = []
+  const interfaces: Interface[] = []
   const typeNameMap: Record<string, boolean> = {}
-  let markRequired = true
   const defines = openAPIData.components.schemas
+  let placement: Interface['placement']
 
   function getRefName(refObject: any): string {
     if (typeof refObject !== 'object' || !refObject.$ref) {
@@ -85,7 +85,13 @@ export default function parser(openAPIData: any, path: string, method: string): 
     // 循环引用
     if (!typeNameMap[typeName]) {
       typeNameMap[typeName] = true
-      interfaces.push(getInterfaceTP(typeName))
+
+      interfaces.push({
+        name: resolveTypeName(typeName),
+        description: defines[typeName].description,
+        fields: resolveObject(defines[typeName]).fields || [],
+        placement,
+      })
     }
 
     return resolveTypeName(typeName) as string
@@ -300,6 +306,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
     if (templateParams.path) {
       const typeName = `${toFirstUpperCase(name)}PathVar`
       const fields: any[] = []
+      placement = 'path'
 
       templateParams.path.forEach((parameter: any) => {
         fields.push({
@@ -311,17 +318,14 @@ export default function parser(openAPIData: any, path: string, method: string): 
         })
       })
 
-      interfaces.push({
-        name: typeName,
-        fields: fields,
-      })
-
+      interfaces.push({ name: typeName, fields: fields, placement })
       templateParams.path = typeName
     }
 
     if (templateParams.query) {
       const typeName = `${toFirstUpperCase(name)}Query`
       const fields: any[] = []
+      placement = 'body'
 
       templateParams.query.forEach((parameter: any) => {
         fields.push({
@@ -333,11 +337,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
         })
       })
 
-      interfaces.push({
-        name: typeName,
-        fields: fields,
-      })
-
+      interfaces.push({ name: typeName, fields: fields, placement })
       templateParams.query = typeName
     }
 
@@ -345,6 +345,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
   }
 
   function getBodyTP(requestBody: any = {}) {
+    placement = 'body'
     const reqBody = resolveRefObject(requestBody)
     if (!reqBody) return null
     const reqContent = reqBody.content
@@ -369,7 +370,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
       })
 
       const typeName = `${toFirstUpperCase(name)}Body`
-      interfaces.push({ name: typeName, ...resolveProperties(schema) })
+      interfaces.push({ name: typeName, ...resolveProperties(schema), placement })
 
       return { mediaType, type: typeName }
     }
@@ -417,6 +418,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
   }
 
   function getResponseTP(responses: any = {}) {
+    placement = 'res'
     const { components } = openAPIData
     const response = responses && resolveRefObject(responses.default || responses['200'] || responses['201'])
     if (!response) return
@@ -444,16 +446,6 @@ export default function parser(openAPIData: any, path: string, method: string): 
     return {
       mediaType,
       type: getType(schema),
-    }
-  }
-
-  function getInterfaceTP(typeName: string) {
-    const result = resolveObject(defines[typeName])
-
-    return {
-      name: resolveTypeName(typeName),
-      description: defines[typeName].description,
-      fields: result.fields || [],
     }
   }
 
@@ -527,8 +519,6 @@ export default function parser(openAPIData: any, path: string, method: string): 
   }
 
   function getFields(schemaObject: any) {
-    const requiredPropKeys = schemaObject?.required ?? false
-
     return schemaObject.properties
       ? Object.keys(schemaObject.properties).map((propName) => {
           const schema = (schemaObject.properties && schemaObject.properties[propName]) || DEFAULT_SCHEMA
@@ -539,9 +529,7 @@ export default function parser(openAPIData: any, path: string, method: string): 
             type: getType(schema),
             description: [schema.title, schema.description].filter((s) => s).join(' '),
             format: schema.format,
-            // 如果没有 required 信息，默认全部是非必填
-            required:
-              markRequired && (requiredPropKeys ? requiredPropKeys.some((key: string) => key === propName) : false),
+            required: schemaObject?.required?.some((key: string) => key === propName),
           }
         })
       : []
@@ -549,7 +537,6 @@ export default function parser(openAPIData: any, path: string, method: string): 
 
   const params = getParamsTP(operationObject.parameters, path)
   const body = getBodyTP(operationObject.requestBody)
-  markRequired = false
   const res = getResponseTP(operationObject.responses)
   const file = getFileTP(operationObject.requestBody)
 

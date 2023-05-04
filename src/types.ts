@@ -10,6 +10,7 @@ export interface Interface {
   name: string
   description?: string
   fields: Field[]
+  placement: 'path' | 'query' | 'body' | 'res'
 }
 
 export interface ParseResult {
